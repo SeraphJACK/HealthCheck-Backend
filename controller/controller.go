@@ -12,11 +12,10 @@ import (
 
 var db *gorm.DB
 
-func Start() error {
-	dbPath := flag.String("db", "data.db", "")
-	listen := flag.String("listen", "0.0.0.0:8080", "")
-	flag.Parse()
+var dbPath = flag.String("db", "data.db", "")
+var listen = flag.String("listen", "0.0.0.0:8080", "")
 
+func Start() error {
 	var err error
 	db, err = gorm.Open(sqlite.Open(*dbPath), &gorm.Config{})
 	if err != nil {

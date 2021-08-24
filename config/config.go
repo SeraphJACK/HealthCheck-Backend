@@ -12,11 +12,9 @@ type Config struct {
 }
 
 var Cfg = Config{Token: uuid.NewV4().String()}
+var path = flag.String("conf", "config.yml", "")
 
 func Init() error {
-	path := flag.String("conf", "config.yml", "")
-	flag.Parse()
-
 	f, err := os.Open(*path)
 	if err != nil {
 		if os.IsNotExist(err) {

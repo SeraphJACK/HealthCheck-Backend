@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"github.com/SeraphJACK/HealthCheck/config"
 	"github.com/SeraphJACK/HealthCheck/controller"
 	"log"
@@ -8,6 +9,7 @@ import (
 )
 
 func main() {
+	flag.Parse()
 	err := config.Init()
 	if err != nil {
 		log.Printf("Failed to read configuration: %v\n", err)
