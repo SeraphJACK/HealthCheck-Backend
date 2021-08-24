@@ -36,7 +36,7 @@ func Start() error {
 }
 
 func lookAfterServers() {
-	t := time.NewTimer(30 * time.Second)
+	t := time.NewTicker(30 * time.Second)
 	for {
 		<-t.C
 		var servers []model.Server
