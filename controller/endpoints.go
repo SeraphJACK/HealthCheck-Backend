@@ -58,6 +58,8 @@ func registerEndpoints(g *gin.Engine) {
 		}
 		server := model.Server{}
 		db.FirstOrCreate(&server, model.Server{Name: form.Name})
+		server.Status = 0
+		db.Save(server)
 		tps := model.TPS{
 			Last1m:  form.Last1M,
 			Last5m:  form.Last5M,

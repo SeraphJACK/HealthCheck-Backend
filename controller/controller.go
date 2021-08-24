@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"errors"
 	"flag"
 	"github.com/SeraphJACK/HealthCheck/model"
 	"github.com/gin-gonic/gin"
@@ -42,7 +43,10 @@ func lookAfterServers() {
 		db.Where("status = 0").Find(&servers)
 		for _, v := range servers {
 			var tps model.TPS
-			db.Order("time desc").Find(&tps, model.TPS{ServerID: v.ID})
+			result := db.Order("time desc").Find(&tps, model.TPS{ServerID: v.ID})
+			if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+				continue
+			}
 			if time.Now().Sub(tps.Time) > time.Second*90 {
 				v.Status = 2
 				db.Save(v)
