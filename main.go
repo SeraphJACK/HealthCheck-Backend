@@ -14,7 +14,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	err = controller.Init()
+	err = controller.Start()
 	if err != nil {
 		log.Printf("Failed to start: %v\n", err)
 		os.Exit(1)

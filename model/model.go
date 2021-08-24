@@ -16,6 +16,6 @@ type TPS struct {
 	Last5m   float64
 	Last10m  float64
 	Time     time.Time
-	ServerID int
+	ServerID uint
 	Server   Server
 }
