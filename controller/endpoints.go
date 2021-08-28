@@ -91,6 +91,7 @@ func registerEndpoints(g *gin.Engine) {
 		db.FirstOrCreate(&server, model.Server{Name: form.Name})
 		if form.Type == "start" {
 			server.Status = 0
+			server.StartTime = time.Now()
 			notify.Notify(fmt.Sprintf("Server %s started", form.Name), false)
 		} else {
 			server.Status = 1

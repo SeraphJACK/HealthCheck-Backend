@@ -7,8 +7,9 @@ import (
 
 type Server struct {
 	gorm.Model
-	Name   string `gorm:"unique"`
-	Status uint8
+	Name      string `gorm:"unique"`
+	StartTime time.Time
+	Status    uint8
 }
 
 type TPS struct {
