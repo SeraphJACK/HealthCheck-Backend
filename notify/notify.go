@@ -28,6 +28,7 @@ func Init() error {
 }
 
 func Notify(msg string, sound bool) {
+	log.Printf("Sending notification %s\n", msg)
 	var err error
 	if sound {
 		_, err = bot.Send(chat, msg)
