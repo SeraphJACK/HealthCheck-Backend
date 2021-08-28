@@ -95,6 +95,7 @@ func registerEndpoints(g *gin.Engine) {
 			notify.Notify(fmt.Sprintf("Server %s started", form.Name), false)
 		} else {
 			server.Status = 1
+			notify.Notify(fmt.Sprintf("Server %s stopped", form.Name), true)
 		}
 		db.Save(server)
 		ctx.Status(http.StatusNoContent)
