@@ -3,7 +3,9 @@ package controller
 import (
 	"errors"
 	"flag"
+	"fmt"
 	"github.com/SeraphJACK/HealthCheck/model"
+	"github.com/SeraphJACK/HealthCheck/notify"
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -50,6 +52,7 @@ func lookAfterServers() {
 			if time.Now().Sub(tps.Time) > time.Second*90 {
 				v.Status = 2
 				db.Save(v)
+				notify.Notify(fmt.Sprintf("Server %s lost connection", v.Name), true)
 			}
 		}
 	}

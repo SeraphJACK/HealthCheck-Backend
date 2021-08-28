@@ -2,8 +2,10 @@ package controller
 
 import (
 	"errors"
+	"fmt"
 	"github.com/SeraphJACK/HealthCheck/config"
 	"github.com/SeraphJACK/HealthCheck/model"
+	"github.com/SeraphJACK/HealthCheck/notify"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 	"net/http"
@@ -61,13 +63,18 @@ func registerEndpoints(g *gin.Engine) {
 		server.Status = 0
 		db.Save(server)
 		tps := model.TPS{
-			Last1m:  form.Last1M,
-			Last5m:  form.Last5M,
-			Last10m: form.Last10M,
-			Time:    time.Now(),
-			Server:  server,
+			Last1m:   form.Last1M,
+			Last5m:   form.Last5M,
+			Last10m:  form.Last10M,
+			Time:     time.Now(),
+			Server:   server,
+			ServerID: server.ID,
 		}
 		db.Create(&tps)
+		if tps.Last1m <= 15 {
+			notify.Notify(fmt.Sprintf("Server %s has performance issue, TPS from last 1m, 5m, 10m: %.2f, %.2f, %.2f",
+				server.Name, tps.Last1m, tps.Last5m, tps.Last10m), true)
+		}
 		ctx.Status(http.StatusNoContent)
 	})
 
@@ -84,6 +91,7 @@ func registerEndpoints(g *gin.Engine) {
 		db.FirstOrCreate(&server, model.Server{Name: form.Name})
 		if form.Type == "start" {
 			server.Status = 0
+			notify.Notify(fmt.Sprintf("Server %s started", form.Name), false)
 		} else {
 			server.Status = 1
 		}

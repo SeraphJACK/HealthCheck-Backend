@@ -8,10 +8,19 @@ import (
 )
 
 type Config struct {
-	Token string `yaml:"Token"`
+	Token         string `yaml:"Token"`
+	NotifyEnabled bool   `yaml:"notify_enabled"`
+	BotToken      string `yaml:"bot_token"`
+	ChatId        string `yaml:"chat_id"`
 }
 
-var Cfg = Config{Token: uuid.NewV4().String()}
+var Cfg = Config{
+	Token:         uuid.NewV4().String(),
+	NotifyEnabled: false,
+	BotToken:      "",
+	ChatId:        "",
+}
+
 var path = flag.String("conf", "config.yml", "")
 
 func Init() error {

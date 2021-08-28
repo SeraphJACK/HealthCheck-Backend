@@ -4,6 +4,7 @@ import (
 	"flag"
 	"github.com/SeraphJACK/HealthCheck/config"
 	"github.com/SeraphJACK/HealthCheck/controller"
+	"github.com/SeraphJACK/HealthCheck/notify"
 	"log"
 	"os"
 )
@@ -13,6 +14,12 @@ func main() {
 	err := config.Init()
 	if err != nil {
 		log.Printf("Failed to read configuration: %v\n", err)
+		os.Exit(1)
+	}
+
+	err = notify.Init()
+	if err != nil {
+		log.Printf("Failed to initialize notification: %v\n", err)
 		os.Exit(1)
 	}
 
