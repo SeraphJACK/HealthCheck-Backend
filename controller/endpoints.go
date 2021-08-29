@@ -60,6 +60,9 @@ func registerEndpoints(g *gin.Engine) {
 		}
 		server := model.Server{}
 		db.FirstOrCreate(&server, model.Server{Name: form.Name})
+		if server.Status == 2 {
+			notify.Notify(fmt.Sprintf("Server %s back online\n", server.Name), false)
+		}
 		server.Status = 0
 		db.Save(server)
 		tps := model.TPS{
