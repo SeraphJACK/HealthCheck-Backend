@@ -1,7 +1,9 @@
 FROM tetafro/golang-gcc:1.16-alpine AS build
-COPY ./ /app/
+COPY go.mod go.sum /app/
 WORKDIR /app/
 ENV GOPROXY=https://goproxy.io,direct
+RUN go mod download
+COPY ./ /app/
 RUN go build
 
 FROM alpine:latest
