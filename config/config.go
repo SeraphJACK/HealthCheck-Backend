@@ -8,7 +8,7 @@ import (
 )
 
 type Config struct {
-	Token         string `yaml:"Token"`
+	Token         string `yaml:"token"`
 	NotifyEnabled bool   `yaml:"notify_enabled"`
 	BotToken      string `yaml:"bot_token"`
 	ChatId        string `yaml:"chat_id"`
