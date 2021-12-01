@@ -56,7 +56,7 @@ func registerEndpoints(g *gin.Engine) {
 			return
 		}
 		form := ServerStatusForm{}
-		if ctx.BindJSON(&form) != nil {
+		if ctx.Bind(&form) != nil {
 			return
 		}
 		server := model.Server{}
@@ -89,7 +89,7 @@ func registerEndpoints(g *gin.Engine) {
 			return
 		}
 		form := LifecycleForm{}
-		if ctx.BindJSON(&form) != nil {
+		if ctx.Bind(&form) != nil {
 			return
 		}
 		server := model.Server{}
