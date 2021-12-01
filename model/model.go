@@ -13,10 +13,11 @@ type Server struct {
 }
 
 type TPS struct {
-	Last1m   float64
-	Last5m   float64
-	Last10m  float64
-	Time     time.Time
-	ServerID uint
-	Server   Server
+	Last1m      float64
+	Last5m      float64
+	Last10m     float64
+	PlayerCount uint
+	Time        time.Time
+	ServerID    uint
+	Server      Server
 }

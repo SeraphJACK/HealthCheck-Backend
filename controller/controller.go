@@ -47,9 +47,11 @@ func lookAfterServers() {
 			var tps model.TPS
 			result := db.Order("time desc").Find(&tps, model.TPS{ServerID: v.ID})
 			if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+				// The server is just created and started
 				continue
 			}
 			if time.Now().Sub(tps.Time) > time.Second*90 && time.Now().Sub(v.StartTime) > time.Second*90 {
+				// Heartbeat timed out
 				v.Status = 2
 				db.Save(v)
 				notify.Notify(fmt.Sprintf("Server %s lost connection", v.Name), true)

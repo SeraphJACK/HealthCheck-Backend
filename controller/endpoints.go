@@ -37,15 +37,16 @@ func registerEndpoints(g *gin.Engine) {
 			ctx.Status(http.StatusNotFound)
 			return
 		}
-		res := ServerStatus{
-			Status: server.Status,
-		}
 		var tps model.TPS
 		db.Order("time desc").Where("server_id = ?", server.ID).First(&tps)
-		res.LastSeen = tps.Time
-		res.TPS1min = tps.Last1m
-		res.TPS5min = tps.Last5m
-		res.TPS10min = tps.Last10m
+		res := ServerStatus{
+			Status:      server.Status,
+			LastSeen:    tps.Time,
+			TPS1min:     tps.Last1m,
+			TPS5min:     tps.Last5m,
+			TPS10min:    tps.Last10m,
+			PlayerCount: tps.PlayerCount,
+		}
 		ctx.JSON(http.StatusOK, res)
 	})
 
@@ -66,19 +67,20 @@ func registerEndpoints(g *gin.Engine) {
 		server.Status = 0
 		db.Save(server)
 		tps := model.TPS{
-			Last1m:   form.Last1M,
-			Last5m:   form.Last5M,
-			Last10m:  form.Last10M,
-			Time:     time.Now(),
-			Server:   server,
-			ServerID: server.ID,
+			Last1m:      form.Last1M,
+			Last5m:      form.Last5M,
+			Last10m:     form.Last10M,
+			Time:        time.Now(),
+			Server:      server,
+			ServerID:    server.ID,
+			PlayerCount: form.PlayerCount,
 		}
 		db.Create(&tps)
 		if tps.Last1m <= 15 {
 			notify.Notify(fmt.Sprintf("Server %s has performance issue, TPS from last 1m, 5m, 10m: %.2f, %.2f, %.2f",
 				server.Name, tps.Last1m, tps.Last5m, tps.Last10m), true)
 		}
-		ctx.Status(http.StatusNoContent)
+		ctx.Status(http.StatusCreated)
 	})
 
 	g.POST("/lifecycle", func(ctx *gin.Context) {
