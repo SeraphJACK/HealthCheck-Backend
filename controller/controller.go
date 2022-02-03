@@ -9,7 +9,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
-	"net/http"
 	"time"
 )
 
@@ -34,7 +33,7 @@ func Start() error {
 
 	go lookAfterServers()
 
-	return http.ListenAndServe(*listen, g)
+	return g.Run(*listen)
 }
 
 func lookAfterServers() {
