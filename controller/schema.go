@@ -7,13 +7,22 @@ type ServerResponseEntry struct {
 	Name string `json:"name"`
 }
 
+type ServerTPS struct {
+	TPS1min     float64 `json:"tps_1_min"`
+	TPS5min     float64 `json:"tps_5_min"`
+	TPS10min    float64 `json:"tps_10_min"`
+	PlayerCount uint    `json:"player_count"`
+}
+
+type ServerTPSDetail struct {
+	ServerTPS
+	Time int64 `json:"time"`
+}
+
 type ServerStatus struct {
-	LastSeen    time.Time `json:"last_seen"`
-	Status      uint8     `json:"status"`
-	TPS1min     float64   `json:"tps_1_min"`
-	TPS5min     float64   `json:"tps_5_min"`
-	TPS10min    float64   `json:"tps_10_min"`
-	PlayerCount uint      `json:"player_count"`
+	ServerTPS
+	LastSeen time.Time `json:"last_seen"`
+	Status   uint8     `json:"status"`
 }
 
 type ServerStatusForm struct {

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/SeraphJACK/HealthCheck/model"
 	"github.com/SeraphJACK/HealthCheck/notify"
+	"github.com/gin-contrib/cache/persistence"
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -16,8 +17,11 @@ var db *gorm.DB
 
 var dbPath = flag.String("db", "data.db", "")
 var listen = flag.String("listen", "0.0.0.0:8080", "")
+var cacheStore persistence.CacheStore
 
 func Start() error {
+	cacheStore = persistence.NewInMemoryStore(time.Minute)
+
 	var err error
 	db, err = gorm.Open(sqlite.Open(*dbPath), &gorm.Config{})
 	if err != nil {

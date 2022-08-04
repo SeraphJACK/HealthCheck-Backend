@@ -6,12 +6,21 @@ import (
 	"github.com/SeraphJACK/HealthCheck/config"
 	"github.com/SeraphJACK/HealthCheck/model"
 	"github.com/SeraphJACK/HealthCheck/notify"
+	"github.com/gin-contrib/cache"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 	"net/http"
 	"strconv"
 	"time"
 )
+
+func NoQuery(ctx *gin.Context) {
+	if len(ctx.Request.URL.Query()) != 0 {
+		ctx.String(http.StatusForbidden, "query string now allowed")
+		ctx.Abort()
+	}
+}
 
 func registerEndpoints(g *gin.Engine) {
 	g.GET("/server", func(ctx *gin.Context) {
@@ -40,12 +49,14 @@ func registerEndpoints(g *gin.Engine) {
 		var tps model.TPS
 		db.Order("time desc").Where("server_id = ?", server.ID).First(&tps)
 		res := ServerStatus{
-			Status:      server.Status,
-			LastSeen:    tps.Time,
-			TPS1min:     tps.Last1m,
-			TPS5min:     tps.Last5m,
-			TPS10min:    tps.Last10m,
-			PlayerCount: tps.PlayerCount,
+			Status:   server.Status,
+			LastSeen: tps.Time,
+			ServerTPS: ServerTPS{
+				TPS1min:     tps.Last1m,
+				TPS5min:     tps.Last5m,
+				TPS10min:    tps.Last10m,
+				PlayerCount: tps.PlayerCount,
+			},
 		}
 		ctx.JSON(http.StatusOK, res)
 	})
@@ -105,4 +116,73 @@ func registerEndpoints(g *gin.Engine) {
 		db.Save(server)
 		ctx.Status(http.StatusNoContent)
 	})
+
+	g.GET("/:server/summary", NoQuery, cache.CachePageAtomic(cacheStore, time.Minute, func(ctx *gin.Context) {
+		var server model.Server
+		s, err := strconv.Atoi(ctx.Param("server"))
+		if err != nil {
+			ctx.Status(http.StatusBadRequest)
+			return
+		}
+		if errors.Is(db.First(&server, uint(s)).Error, gorm.ErrRecordNotFound) {
+			ctx.Status(http.StatusNotFound)
+			return
+		}
+		now := time.Now()
+		begin := time.Date(now.Year(), now.Month(), now.Day(), now.Hour(), 0, 0, 0, now.Location())
+		res := make([]uint, 24)
+		for i := 0; i < 24; i++ {
+			var tps model.TPS
+			err := db.Session(&gorm.Session{Logger: logger.Default.LogMode(logger.Silent)}).
+				Model(&model.TPS{}).
+				Where("server_id=?", server.ID).
+				Where("time BETWEEN ? AND ?", begin.Add(-time.Duration(i+1)*time.Hour), begin.Add(-time.Duration(i)*time.Hour)).
+				Order("last1m").
+				First(&tps).Error
+			if err != nil {
+				// server is down
+				res[23-i] = 2
+				continue
+			}
+			if tps.Last1m <= 15.0 {
+				// degraded performance
+				res[23-i] = 1
+			} else {
+				// normal
+				res[23-i] = 0
+			}
+		}
+		ctx.JSON(http.StatusOK, res)
+	}))
+
+	g.GET("/:server/detail", NoQuery, cache.CachePageAtomic(cacheStore, time.Minute, func(ctx *gin.Context) {
+		var server model.Server
+		s, err := strconv.Atoi(ctx.Param("server"))
+		if err != nil {
+			ctx.Status(http.StatusBadRequest)
+			return
+		}
+		if errors.Is(db.First(&server, uint(s)).Error, gorm.ErrRecordNotFound) {
+			ctx.Status(http.StatusNotFound)
+			return
+		}
+		var tps []model.TPS
+		db.Where("server_id=?", server.ID).
+			Where("time>?", time.Now().Add(-6*time.Hour)).
+			Order("time").
+			Find(&tps)
+		res := make([]ServerTPSDetail, 0, len(tps))
+		for _, v := range tps {
+			res = append(res, ServerTPSDetail{
+				ServerTPS: ServerTPS{
+					TPS1min:     v.Last1m,
+					TPS5min:     v.Last5m,
+					TPS10min:    v.Last10m,
+					PlayerCount: v.PlayerCount,
+				},
+				Time: v.Time.Unix(),
+			})
+		}
+		ctx.JSON(http.StatusOK, res)
+	}))
 }

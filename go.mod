@@ -3,6 +3,7 @@ module github.com/SeraphJACK/HealthCheck
 go 1.16
 
 require (
+	github.com/gin-contrib/cache v1.1.0
 	github.com/gin-gonic/gin v1.7.4
 	github.com/go-yaml/yaml v2.1.0+incompatible
 	github.com/mattn/go-sqlite3 v1.14.8 // indirect
